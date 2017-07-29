@@ -1,0 +1,32 @@
+{
+  "name": "kful-proxy-server",
+  "version": "1.0.0",
+  "description": "KFul Proxy Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snakeful/kful-proxy-server.git"
+  },
+  "keywords": [
+    "kful",
+    "proxy",
+    "server"
+  ],
+  "author": "Carlos Ful <fulblind@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/snakeful/kful-proxy-server/issues"
+  },
+  "homepage": "https://github.com/snakeful/kful-proxy-server#readme",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "compression": "^1.7.0",
+    "cors": "^2.8.4",
+    "express": "^4.15.3",
+    "helmet": "^3.8.0",
+    "http-proxy": "^1.16.2"
+  }
+}
