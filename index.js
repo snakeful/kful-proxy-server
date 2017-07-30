@@ -5,6 +5,7 @@ const fs = require('fs');
 const express = require('express');
 const app = express();
 const appRouter = express.Router();
+const ifaces = require('os').networkInterfaces();
 app.use(require('helmet')());
 app.use(require('cors')());
 app.use(require('body-parser').json());
@@ -12,16 +13,21 @@ app.use(require('compression')());
 app.use('/api', appRouter);
 
 let useDefaultList = false;
+let proxyPort;
 let socketList;
-function runServer (proxyPort, useDefScktList) {
+function runServer (port, useDefScktList) {
   useDefaultList = useDefScktList || false;
   readSockets();
-  proxyPort = parseInt(proxyPort || '80');
+  proxyPort = parseInt(port || '80');
+  app.proxyPort = proxyPort;
+  if (!app.discoveryPort) {
+    app.discoveryPort = app.proxyPort + 1;
+  }
   server.listen(proxyPort, () => {
-    console.log(`Proxy server on port ${proxyPort}`);
+    console.log(`Proxy server on port ${app.proxyPort}`);
   });
-  app.listen(proxyPort + 1, () => {
-    console.log(`Server on port ${proxyPort + 1}`);
+  app.listen(app.discoveryPort, () => {
+    console.log(`Server on port ${app.discoveryPort}`);
   });
 };
 
@@ -75,6 +81,18 @@ function checkServiceHealth(options) {
     req.end();
   });
 };
+
+// Get the ipv4 address from which the server is running
+Object.keys(ifaces).forEach((ifname) => {
+  ifaces[ifname].forEach((iface) => {
+    if (!app.host && iface.family === 'IPv4' && iface.internal) {
+      app.ipAddress4 = iface.address;
+    }
+    if (!app.host && iface.family === 'IPv6' && iface.internal) {
+      app.ipAddress6 = iface.address;
+    }
+  });
+});
 
 let proxy = proxyServer.createProxyServer({});
 const server = http.createServer((req, res) => {
