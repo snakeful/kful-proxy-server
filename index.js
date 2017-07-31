@@ -180,7 +180,7 @@ appRouter.get('/sockets/:id', (req, res) => {
 });
 
 appRouter.post('/sockets', (req, res) => {
-  if (!req.body.host || !req.body.port) {
+  if (!req.body || (req.body && (!req.body.host || !req.body.port))) {
     return res.status(404).json({
       err: 'Socket not sent. Payload structure: {"host":"<host>", "port": <port>}'
     });
@@ -205,7 +205,7 @@ appRouter.post('/sockets', (req, res) => {
       port: parseInt(req.body.port)
     });
   }
-  res.status(200).send();
+  res.status(200).send(true);
   writeSockets();
 });
 
