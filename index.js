@@ -11,14 +11,16 @@ app.use(require('cors')());
 app.use(require('body-parser').json());
 app.use(require('compression')());
 app.use('/api', appRouter);
+app.dirname = __dirname;
+app.configDir = 'config';
+app.adbFile = 'sockets-adb.json';
 
 let useDefaultList = false;
 let proxyPort;
 let socketList;
-function runServer (port, useDefScktList) {
-  useDefaultList = useDefScktList || false;
+function runServer (port, useDefScktList = false) {
   readSockets();
-  proxyPort = parseInt(port || '80');
+  proxyPort = parseInt(port || process.env.PORT || 80);
   app.proxyPort = proxyPort;
   if (!app.discoveryPort) {
     app.discoveryPort = app.proxyPort + 1;
@@ -31,9 +33,28 @@ function runServer (port, useDefScktList) {
   });
 };
 
+function getConfigDir () {
+  return `${app.dirname}/${app.configDir}`;
+};
+
+function getConfigFile () {
+  return `${app.dirname}/${app.configDir}/${app.adbFile}`;
+};
+
 function readSockets () {
   try {
-    socketList = JSON.parse(fs.readFileSync(`${__dirname}/config/sockets-adb.json`, 'utf8'));
+    if (!fs.existsSync(getConfigDir())) {
+      fs.mkdirSync(getConfigDir());
+    }
+    if (!fs.existsSync(getConfigFile())) {
+      fs.writeFileSync(getConfigFile(), JSON.stringify({
+        default: {
+          sockets: [],
+          curr: 0
+        }
+      }));
+    }
+    socketList = JSON.parse(fs.readFileSync(getConfigFile(), 'utf8'));
     console.log('Sockets loaded.');
   } catch (ex) {
     throw ex;
@@ -42,7 +63,7 @@ function readSockets () {
 
 function writeSockets () {
   try {
-    fs.writeFileSync(`${__dirname}/config/sockets-adb.json`, JSON.stringify(socketList));
+    fs.writeFileSync(getConfigFile(), JSON.stringify(socketList));
     console.log('Sockets saved.');
   } catch (ex) {
     throw ex;
