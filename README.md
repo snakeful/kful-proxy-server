@@ -19,3 +19,5 @@ proxy.dirname = <path of the directory to save sockets address book>;
 /* Default list false, will use default socket list with true value */
 proxy.runServer(3000, true)
 ```
+
+Changing name of project to ful-pxy-svc
